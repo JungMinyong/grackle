@@ -77,6 +77,26 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
     fprintf(stdout, "Initializing grackle data.\n");
   }
 
+  /* Modes 2 (Chiaki in newchem) and 3 are not implemented here. */
+  if (my_chemistry->dust_chemistry != 0 &&
+      my_chemistry->dust_chemistry != 1 &&
+      my_chemistry->dust_chemistry != GRACKLE_DUST_REMY_RUYER_LEGACY &&
+      my_chemistry->dust_chemistry != GRACKLE_DUST_REMY_RUYER_PHYSICAL) {
+    fprintf(stderr, "ERROR: dust_chemistry must be 0, 1, 4 (historical Remy-Ruyer), or 5 (physical Remy-Ruyer).\n");
+    return FAIL;
+  }
+  /* Accept resolved internal switches when reinitializing the same object,
+     but reject ambiguous old h2_on_dust=2 requests without an explicit model. */
+  if (my_chemistry->h2_on_dust < 0 ||
+      (my_chemistry->h2_on_dust > 1 &&
+       !(my_chemistry->dust_chemistry == GRACKLE_DUST_REMY_RUYER_LEGACY &&
+         my_chemistry->h2_on_dust == 3) &&
+       !(my_chemistry->dust_chemistry == GRACKLE_DUST_REMY_RUYER_PHYSICAL &&
+         my_chemistry->h2_on_dust == 2))) {
+    fprintf(stderr, "ERROR: use h2_on_dust=0/1; select Remy-Ruyer with dust_chemistry=4 or 5.\n");
+    return FAIL;
+  }
+
   // Activate dust chemistry machinery.
   if (my_chemistry->dust_chemistry > 0) {
 
@@ -101,6 +121,15 @@ int _initialize_chemistry_data(chemistry_data *my_chemistry,
     }
 
   }
+
+  /* Fortran idust: 1 standard, 2 physical, 3 historical. These internal
+     values do not add another public abundance selector. */
+  if (my_chemistry->dust_chemistry == GRACKLE_DUST_REMY_RUYER_LEGACY)
+    my_chemistry->h2_on_dust = 3;
+  else if (my_chemistry->dust_chemistry == GRACKLE_DUST_REMY_RUYER_PHYSICAL)
+    my_chemistry->h2_on_dust = 2;
+  else if (my_chemistry->dust_chemistry > 0)
+    my_chemistry->h2_on_dust = 1;
 
   // Default photo-electric heating to off if unset.
   if (my_chemistry->photoelectric_heating < 0) {

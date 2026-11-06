@@ -14,6 +14,11 @@
 #ifndef __CHEMISTRY_DATA_H__
 #define __CHEMISTRY_DATA_H__
 
+/* Supported custom dust_chemistry modes; no extra chemistry_data member. */
+#define GRACKLE_HAS_REMY_RUYER_DUST 1
+#define GRACKLE_DUST_REMY_RUYER_LEGACY 4
+#define GRACKLE_DUST_REMY_RUYER_PHYSICAL 5
+
 /**********************************
  *** Grackle runtime parameters ***
  **********************************/
@@ -41,8 +46,11 @@ typedef struct
         - photo-electric heating
         - recombination cooling
         - with primordial_chemistry > 1:
-          - H2 formation on dust grains
-          - gas/grain heat transfer */
+        - H2 formation on dust grains
+        - gas/grain heat transfer
+     4) basic dust with historical normalized Remy-Ruyer abundance
+     5) basic dust with corrected physical Remy-Ruyer abundance
+     2 and 3 are unsupported/reserved in this branch */
   int dust_chemistry;
 
   /* metal cooling on/off
@@ -63,8 +71,9 @@ typedef struct
   /* adiabatic index */
   double Gamma;
 
-  /* H2 formation on dust grains and dust cooling
-     0) off, 1) on */
+  /* H2 formation on dust grains and dust cooling: public values 0/1.
+     Initialization uses internal values 2/3 for dust_chemistry=5/4.
+     Select the abundance prescription with dust_chemistry. */
   int h2_on_dust;
 
   /* Flag to supply a dust density field */

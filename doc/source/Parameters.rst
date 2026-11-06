@@ -51,7 +51,7 @@ For all on/off integer flags, 0 is off and 1 is on.
    Default: 0.
 
    - 0: no dust-related processes included.
-   - 1: adds the following processes:
+   - 1: uses standard linear dust abundance and adds the following processes:
 
         #. photo-electric heating (sets :c:data:`photoelectric_heating` to 2).
         #. cooling from electron recombination onto dust (equation 9 from
@@ -65,6 +65,25 @@ For all on/off integer flags, 0 is off and 1 is on.
         Setting :c:data:`dust_chemistry` greater than 0 requires
         :c:data:`metal_cooling` to be enabled.
 
+   - 4: the same processes, using historical normalized Remy-Ruyer abundance.
+   - 5: the same processes, using the corrected physical Remy-Ruyer mass ratio.
+
+   Values 2 and 3 are unsupported/reserved in this branch. In particular,
+   newchem's Chiaki dust-evolution model uses 2 and is not implemented here.
+
+   For mode 5, ``x = log10(Z/0.014)`` and ``D/G = 10**(-g)``, with
+   ``g = 0.68 - 3.08*x`` for ``x <= -0.73`` and ``g = 2.21 - x`` otherwise.
+   Nonpositive Z returns zero. This is the absolute empirical fit, rather
+   than rescaling to Grackle's standard solar dust calibration.
+
+   Mode 4 deliberately preserves the old helper, which divides the fit by
+   ``0.006616595`` before treating it as a physical ratio. It retains the
+   historical normalization error and rounded constants for reproducibility.
+
+   An explicit dust density field overrides the inferred abundance in all
+   enabled modes. There is no separate dust-abundance parameter. The header
+   advertises support for 4/5 with ``GRACKLE_HAS_REMY_RUYER_DUST``.
+
 .. note:: Other values for :c:data:`photoelectric_heating` may also be used
    in conjunction with setting the :c:data:`dust_chemistry` parameter. It will
    only be changed to 2 if unset.
@@ -73,8 +92,15 @@ For all on/off integer flags, 0 is off and 1 is on.
 
    Flag to enable H\ :sub:`2` formation on dust grains, dust cooling, and
    dust-gas heat transfer follow `Omukai (2000)
-   <http://adsabs.harvard.edu/abs/2000ApJ...534..809O>`_.  This assumes
-   that the dust to gas ratio scales with the metallicity.  Default: 0.
+   <http://adsabs.harvard.edu/abs/2000ApJ...534..809O>`_.
+   Public values are 0 (off) and 1 (on). Select the dust abundance law
+   using :c:data:`dust_chemistry`. Initialization uses internal values 2/3
+   for the corrected/historical custom modes; these are not a second public
+   model selector. Default: 0.
+
+   Old-style ``h2_on_dust=2`` without a custom dust-chemistry mode is rejected.
+   Select ``dust_chemistry=4`` to reproduce historical behavior or
+   ``dust_chemistry=5`` for the corrected fit, and omit the old H2 switch.
 
 .. c:var:: int metal_cooling
 

@@ -702,7 +702,17 @@ c  new (correct) way: (april 4, 2007)
                  endif
               enddo
             else if (idust == 2) then
-!           use dust model for better scaling with low metallicity
+!           Physical Remy-Ruyer dust/gas mass ratio (not MW-normalized).
+              do i = is+1, ie+1
+                if ( itmask(i) ) then
+                  call remy_ruyer_dust_to_gas_ratio(
+     &                                       metallicity(i)*z_solar,
+     &                                       dust_to_gas_ratio)
+                  dust2gas(i) = dust_to_gas_ratio
+                endif
+              enddo
+            else if (idust == 3) then
+!           Explicit historical normalization, for reproducibility only.
               do i = is+1, ie+1
                 if ( itmask(i) ) then
                   call normalized_dust_to_gas_ratio(
@@ -1158,6 +1168,28 @@ c  new (correct) way: (april 4, 2007)
 !   OUTPUTS -
 !     D    - dust to gas ratio normalized to solar value
 !
+      subroutine remy_ruyer_dust_to_gas_ratio(Z, D)
+!     Absolute empirical D/G fit. Coefficients follow the legacy model,
+!     but the result has the physical convention expected by dust2gas.
+      implicit NONE
+      real*8 Z, D, x, g_to_d
+
+      if (Z .le. 0.0d0) then
+         D = 0.0d0
+         return
+      endif
+
+      x = log10(Z / 0.014d0)
+      if (x .le. -0.73d0) then
+         g_to_d = 0.68d0 - 3.08d0 * x
+      else
+         g_to_d = 2.21d0 - x
+      endif
+      D = 10.0d0**(-g_to_d)
+      return
+      end
+
+
       subroutine normalized_dust_to_gas_ratio(Z, D)
 ! -------------------------------------------------------------------
 
