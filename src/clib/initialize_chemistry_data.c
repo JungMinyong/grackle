@@ -173,6 +173,14 @@ int local_initialize_chemistry_data(chemistry_data *my_chemistry,
     fprintf(stdout, "Initializing grackle data.\n");
   }
 
+  /* Mode 5 changes abundance only; keep h2_on_dust a boolean. */
+  if (my_chemistry->dust_chemistry != 0 &&
+      my_chemistry->dust_chemistry != 1 &&
+      my_chemistry->dust_chemistry != 5) {
+    fprintf(stderr, "ERROR: dust_chemistry must be 0, 1, or 5.\n");
+    return GR_FAIL;
+  }
+
   // Activate dust chemistry machinery.
   if (my_chemistry->dust_chemistry > 0) {
 

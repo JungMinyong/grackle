@@ -720,7 +720,12 @@ c  new (correct) way: (april 4, 2007)
          else
             do i = is+1, ie+1
                if ( itmask(i) ) then
-                  dust2gas(i) = fgr * metallicity(i)
+                  if (idustall .eq. 5) then
+                     call remy_ruyer_dust_to_gas_ratio(
+     &                    metallicity(i)*z_solar, dust2gas(i))
+                  else
+                     dust2gas(i) = fgr * metallicity(i)
+                  endif
                endif
             enddo
          endif
@@ -1150,5 +1155,25 @@ c  new (correct) way: (april 4, 2007)
          end if
       enddo
 
+      return
+      end
+
+!     Corrected absolute Remy-Ruyer broken-power-law dust/gas mass ratio.
+!     Z is a metal mass fraction, not a solar-normalized metallicity.
+      subroutine remy_ruyer_dust_to_gas_ratio(Z, D)
+      implicit none
+      real*8 Z, D, x, g_to_d
+
+      if (Z .le. 0.0d0) then
+         D = 0.0d0
+         return
+      endif
+      x = log10(Z / 0.014d0)
+      if (x .le. -0.73d0) then
+         g_to_d = 0.68d0 - 3.08d0*x
+      else
+         g_to_d = 2.21d0 - x
+      endif
+      D = 10.0d0**(-g_to_d)
       return
       end

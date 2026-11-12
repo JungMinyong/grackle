@@ -65,6 +65,19 @@ For all on/off integer flags, 0 is off and 1 is on.
      #. H\ :sub:`2`\  formation on dust (sets :c:data:`h2_on_dust` to 1
         if :c:data:`primordial_chemistry` > 1).
 
+   - 5: enables the same processes as 1, with the corrected absolute
+     Remy-Ruyer broken-power-law dust-to-gas mass ratio. For metal mass
+     fraction Z, let x = log10(Z / 0.014). The dust/gas ratio is
+     10**(-0.68 + 3.08*x) for x <= -0.73 and 10**(-2.21 + x)
+     otherwise; it is zero for Z <= 0. This is an absolute ratio,
+     without division by a Milky Way dust abundance. Unlike mode 1,
+     its abundance does not scale with ``local_dust_to_gas_ratio``.
+     The latter retains its existing role in the dust rate coefficients.
+
+   An explicitly supplied dust-density field takes precedence in either mode.
+   Supported values are 0, 1, and 5; mode 4 is unsupported.
+   ``h2_on_dust`` retains its existing boolean meaning.
+
    Setting :c:data:`dust_chemistry` greater than 0 requires
    :c:data:`metal_cooling` to be enabled.
 
@@ -77,7 +90,9 @@ For all on/off integer flags, 0 is off and 1 is on.
    Flag to enable H\ :sub:`2` formation on dust grains, dust cooling, and
    dust-gas heat transfer follow `Omukai (2000)
    <http://adsabs.harvard.edu/abs/2000ApJ...534..809O>`_.  This assumes
-   that the dust to gas ratio scales with the metallicity.  Default: 0.
+   that the dust to gas ratio scales with the metallicity, except when
+   :c:data:`dust_chemistry` is 5 or an explicit dust-density field is used.
+   Default: 0.
 
 .. c:var:: int metal_cooling
 

@@ -57,7 +57,9 @@ typedef struct
         - recombination cooling
         - with primordial_chemistry > 1:
           - H2 formation on dust grains
-          - gas/grain heat transfer */
+          - gas/grain heat transfer
+     5) same processes, corrected physical Remy-Ruyer dust/gas ratio
+     Other values are unsupported. */
   int dust_chemistry;
 
   /* metal cooling on/off
