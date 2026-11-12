@@ -87,3 +87,11 @@ add_custom_command(
 )
 
 gtest_discover_tests(runSyncedChemistryData)
+
+# Synthetic UV tables test physical zero rates without external HDF5 files.
+add_executable(testUVBackgroundZeros test_uv_background_zeros.c)
+target_link_libraries(testUVBackgroundZeros PRIVATE Grackle::Grackle)
+if (UNIX)
+  target_link_libraries(testUVBackgroundZeros PRIVATE m)
+endif()
+add_test(NAME UVBackgroundZeros COMMAND testUVBackgroundZeros)
